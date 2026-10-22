@@ -1,337 +1,400 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Единые правила безопасности при взрывных работах - Тестирование</title>
-    <!-- Подключаем Tailwind CSS для современного дизайна -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Тестирование по билетам</title>
     <style>
+        :root {
+            --bg-color: #f0fdf4;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --primary: #4F46E5;
+            --primary-hover: #4338ca;
+            --correct: #10b981;
+            --wrong: #ef4444;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0fdf4; /* Светло-зеленоватый фон, ассоциирующийся с безопасностью */
-            background-image: radial-gradient(#dcfce7 1px, transparent 1px);
-            background-size: 20px 20px;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
         }
 
-        /* Плавные появления экранов */
-        .fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 100%;
+            max-width: 600px;
+            padding: 32px;
+            text-align: center;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .icon-container {
+            background-color: #e0e7ff;
+            color: var(--primary);
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 16px;
         }
 
-        /* Стили для карточек-вариантов ответа */
-        .option-card {
-            transition: all 0.2s ease;
+        h1 {
+            font-size: 24px;
+            color: var(--text-main);
+            margin-bottom: 8px;
         }
-        .option-card:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border-color: #3b82f6;
+
+        p.subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
         }
-        .option-card:active:not(:disabled) {
-            transform: translateY(0);
+
+        button.btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+
+        button.btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button.btn:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        /* Quiz UI */
+        #quiz-screen, #result-screen {
+            display: none;
+            text-align: left;
+        }
+
+        .ticket-badge {
+            display: inline-block;
+            background: #e0e7ff;
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option-btn {
+            background: #f9fafb;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 15px;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: #f0fdfa;
+        }
+
+        .option-btn.correct {
+            background-color: #d1fae5;
+            border-color: var(--correct);
+            color: #065f46;
+        }
+
+        .option-btn.wrong {
+            background-color: #fee2e2;
+            border-color: var(--wrong);
+            color: #991b1b;
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+        }
+
+        .stats {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 24px;
+            color: var(--text-muted);
         }
         
-        /* Цвета для правильных/неправильных ответов */
-        .correct-answer {
-            background-color: #dcfce7 !important; /* bg-green-100 */
-            border-color: #22c55e !important;     /* border-green-500 */
-            color: #166534 !important;            /* text-green-800 */
-        }
-        .wrong-answer {
-            background-color: #fee2e2 !important; /* bg-red-100 */
-            border-color: #ef4444 !important;     /* border-red-500 */
-            color: #991b1b !important;            /* text-red-800 */
-        }
-        .disabled-option {
-            opacity: 0.7;
-            pointer-events: none;
+        .result-title {
+            text-align: center;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 text-gray-800">
+<body>
 
-    <!-- ГЛАВНЫЙ КОНТЕЙНЕР ПРИЛОЖЕНИЯ -->
-    <div class="w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 relative">
-        
-        <!-- ЭКРАН 1: ВЫБОР БИЛЕТА -->
-        <div id="screen-home" class="p-8 sm:p-12 fade-in block">
-            <div class="text-center mb-10">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl mb-4 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                </div>
-                <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">Тестирование по билетам</h1>
-                <p class="mt-3 text-gray-500 text-lg">Единые правила безопасности при взрывных работах</p>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="tickets-container">
-                <!-- Кнопки билетов генерируются через JS -->
-            </div>
+    <!-- Экран приветствия -->
+    <div class="container" id="welcome-screen">
+        <div class="icon-container">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
         </div>
-
-        <!-- ЭКРАН 2: ТЕСТИРОВАНИЕ -->
-        <div id="screen-quiz" class="hidden flex-col h-full fade-in">
-            <!-- Шапка тестирования -->
-            <div class="bg-gray-50 border-b border-gray-200 p-4 sm:p-6 flex justify-between items-center">
-                <h2 id="quiz-title" class="text-xl font-bold text-gray-800">Билет №</h2>
-                <div class="bg-white px-4 py-1.5 rounded-full shadow-sm text-sm font-semibold text-blue-600 border border-blue-100">
-                    Вопрос <span id="current-q-num">1</span> / <span id="total-q-num">10</span>
-                </div>
-            </div>
-            
-            <!-- Прогресс бар -->
-            <div class="h-1.5 w-full bg-gray-200">
-                <div id="progress-bar" class="h-full bg-blue-600 transition-all duration-300" style="width: 0%;"></div>
-            </div>
-
-            <!-- Тело вопроса -->
-            <div class="p-6 sm:p-8 flex-grow">
-                <h3 id="question-text" class="text-xl sm:text-2xl font-semibold text-gray-900 mb-6 leading-relaxed">
-                    Загрузка вопроса...
-                </h3>
-
-                <div id="options-container" class="space-y-3">
-                    <!-- Варианты ответов генерируются через JS -->
-                </div>
-            </div>
-
-            <!-- Подвал тестирования (кнопка Далее) -->
-            <div class="bg-gray-50 border-t border-gray-200 p-4 sm:p-6 flex justify-end min-h-[80px]">
-                <button id="btn-next" onclick="nextQuestion()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-xl shadow-lg shadow-blue-200 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
-                    Следующий вопрос &rarr;
-                </button>
-            </div>
-        </div>
-
-        <!-- ЭКРАН 3: РЕЗУЛЬТАТЫ -->
-        <div id="screen-result" class="hidden p-8 sm:p-12 text-center fade-in">
-            <div id="result-icon-container" class="mx-auto w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-md">
-                <!-- Иконка вставляется через JS -->
-            </div>
-            
-            <h2 id="result-heading" class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">Результаты</h2>
-            
-            <div class="bg-gray-50 rounded-2xl p-6 mb-8 inline-block shadow-inner border border-gray-100">
-                <p class="text-lg text-gray-600 mb-1">Правильных ответов</p>
-                <div class="text-4xl font-black text-gray-800">
-                    <span id="score-correct" class="text-blue-600">0</span> / <span id="score-total">0</span>
-                </div>
-                <div class="mt-2 text-sm font-medium" id="score-percentage">0%</div>
-            </div>
-
-            <p id="result-message" class="text-lg text-gray-700 mb-8 max-w-md mx-auto"></p>
-
-            <button onclick="goHome()" class="w-full sm:w-auto bg-gray-900 hover:bg-gray-800 text-white font-semibold py-4 px-10 rounded-xl shadow-lg transition-all transform hover:-translate-y-1">
-                Вернуться на главную
-            </button>
-        </div>
+        <h1>Тестирование по билетам</h1>
+        <p class="subtitle">Единые правила безопасности при взрывных работах</p>
+        <button class="btn" id="start-btn">Начать тест</button>
     </div>
 
-    <!-- Скрипты приложения -->
+    <!-- Экран вопросов -->
+    <div class="container" id="quiz-screen">
+        <div class="ticket-badge" id="ticket-info">Билет № 1</div>
+        <div class="question-text" id="question-text">Текст вопроса</div>
+        <div class="options-container" id="options-container">
+            <!-- Кнопки с ответами генерируются через JS -->
+        </div>
+        <button class="btn" id="next-btn" style="display: none;">Следующий вопрос</button>
+    </div>
+
+    <!-- Экран результатов -->
+    <div class="container" id="result-screen">
+        <div class="icon-container" style="background-color: #d1fae5; color: var(--correct);">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        </div>
+        <h1 class="result-title">Тест завершен!</h1>
+        <p class="stats" id="final-score">Вы ответили правильно на X из Y вопросов.</p>
+        <button class="btn" id="restart-btn">Пройти заново</button>
+    </div>
+
     <script>
-        /**
-         * БАЗА ДАННЫХ ВОПРОСОВ
-         * 
-         * ВАЖНО: Свойство `correct` содержит индекс правильного ответа (от 0 до кол-ва вариантов).
-         * Например, если правильный ответ А) - ставьте 0. Если Б) - ставьте 1, В) - 2, Г) - 3.
-         * Индексы проставлены на основе общих знаний Промбезопасности, 
-         * если ответ неверен, просто поменяйте цифру в свойстве `correct`.
-         */
-        const quizData = {
-            "1": [
-                {
-                    question: "1. Какое из перечисленных требований при применении средств инициирования запрещается?",
-                    options: [
-                        "A) При изготовлении промежуточных детонаторов из порошкообразных патронированных взрывчатых веществ с применением детонирующего шнура конец детонирующего шнура в патроне складывать вдвое.",
-                        "Б) Расширять гнёзда патронов (шашек) заводского изготовления, из которых изготовлены боевики из прессованных или литых взрывчатых веществ с инициированием от детонаторов.",
-                        "B) Обматывать детонирующий шнур вокруг патрона взрывчатых веществ.",
-                        "Г) При изготовлении промежуточных детонаторов из порошкообразных патронированных взрывчатых веществ с применением детонирующего шнура конец детонирующего шнура в патроне завязывать узлом.",
-                        "Д) Все ответы неверны."
-                    ],
-                    correct: 3 // Г) завязывать узлом запрещается
-                },
-                {
-                    question: "2. При каком условии разрешается выход взрывника из укрытия после взрыва при взрывании с применением электродетонаторов?",
-                    options: [
-                        "A) После отсоединения электровзрывной сети от источника тока и замыкания её накоротко.",
-                        "Б) Не ранее чем через 5 мин.",
-                        "B) После проветривания.",
-                        "Г) При выполнении всех перечисленных условий.",
-                        "Д) Все ответы неверны."
-                    ],
-                    correct: 1 // Б) Не ранее чем через 5 мин
-                },
-                {
-                    question: "3. Какой документ служит для отпуска взрывчатых материалов взрывникам для производства взрывных работ?",
-                    options: [
-                        "A) Акт-допуск.",
-                        "Б) Наряд-путёвка.",
-                        "B) Наряд-накладная.",
-                        "Г) Наряд-допуск.",
-                        "Д) Все ответы неверны."
-                    ],
-                    correct: 1 // Б) Наряд-путёвка
-                },
-                {
-                    question: "4. Какое из перечисленных требований к уничтожению взрывчатых материалов указано верно?",
-                    options: [
-                        "A) Допускается применение смёрзшихся взрывчатых веществ, содержащих жидкие нитроэфиры 20 %.",
-                        "Б) Уничтожение взрывчатых материалов должно выполняться взрывниками под контролем технического руководителя организации.",
-                        "B) Запрещается подход к месту сжигания до полного прекращения горения костра с взрывчатыми материалами.",
-                        "Г) Взрывчатые материалы допускается сжигать в их таре в соответствии с руководством (инструкцией) по применению.",
-                        "Д) Все ответы неверны."
-                    ],
-                    correct: 1 
-                },
-                {
-                    question: "5. Какими должны быть действия взрывника, если при подаче напряжения взрыва не произошло?",
-                    options: [
-                        "A) Отсоединить от источника тока электровзрывную сеть, замкнуть накоротко её концы, взять с собой ключ от взрывного прибора и только после этого выяснить причину отказа.",
-                        "Б) Отсоединить от источника тока электровзрывную сеть, взять с собой ключ от взрывного прибора и только после этого выяснить причину отказа.",
-                        "B) Отсоединить от источника тока электровзрывную сеть и проверить ее электрическое сопротивление, при обнаружении неисправности принять меры к её устранению.",
-                        "Г) Периодически (не менее трех раз) подать напряжение в электровзрывную сеть, при отсутствии взрыва отключить взрывной прибор, взять с собой ключ от взрывного прибора и только после этого выяснить причину отказа."
-                    ],
-                    correct: 0 
-                },
-                {
-                    question: "6. Какой вид взрывных работ следует относить к массовым взрывам зарядов взрывчатых веществ на земной поверхности?",
-                    options: [
-                        "A) Взрывы, при осуществлении которых требуется большее время для проветривания и возобновления работ в руднике (шахте, участке), чем это предусмотрено в расчёте при повседневной организации работ.",
-                        "Б) Специальные взрывы по обрушению потолочин камер, междуэтажных целиков на всю высоту этажа.",
-                        "B) Взрывание единичных зарядов в выработках протяженностью более 7 м.",
-                        "Г) Взрывание смонтированных в общую взрывную сеть двух и более скважинных, котловых или камерных зарядов, независимо от протяженности заряжаемой выработки, а также единичных зарядов в выработках протяженностью более 10 м."
-                    ],
-                    correct: 3 
-                },
-                {
-                    question: "7. Каким образом должна осуществляться охрана запретной зоны, расположенной на земной поверхности?",
-                    options: [
-                        "A) Перед началом заряжания на границах запретной (опасной) зоны должны быть выставлены посты.",
-                        "Б) Перед началом проведения взрывных работ на границах запретной (опасной) зоны должны быть установлены предупреждающие плакаты с надписями, запрещающими вход в опасную зону.",
-                        "B) Перед началом заряжания на границах запретной (опасной) зоны должны быть установлены ограждения, освещаемые в ночное время."
-                    ],
-                    correct: 0
-                },
-                {
-                    question: "8. В каких местах при взрывных работах могут использоваться слежавшиеся порошкообразные взрывчатые вещества, содержащие гексоген или жидкие нитроэфиры, без размятия или измельчения?",
-                    options: [
-                        "A) В шахтах (рудниках), не опасных по газу.",
-                        "Б) В шахтах (рудниках), разрабатывающих пласты (рудные тела), не опасные по взрывам пыли.",
-                        "В) На земной поверхности.",
-                        "Г) Во всех перечисленных местах.",
-                        "Д) Все ответы неверны."
-                    ],
-                    correct: 2 
-                },
-                {
-                    question: "9. Что из перечисленного не отражается в инструкции по ликвидации отказавших зарядов взрывчатых веществ?",
-                    options: [
-                        "A) Порядок обнаружения невзорвавшихся зарядов, методы ликвидации отказов для каждого вида взрывных работ.",
-                        "Б) Величина радиуса опасной зоны при ликвидации отказа, порядок её обозначения на местности.",
-                        "B) Порядок сбора, учёта и уничтожения остатков взрывчатых материалов, извлечённых при ликвидации отказа.",
-                        "Г) Требования к квалификации лиц, участвующих в ликвидации неразорвавшихся зарядов."
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "10. Из чего состоит проект буровзрывных (взрывных) работ (проект массового взрыва) для конкретных условий?",
-                    options: [
-                        "A) Из распорядка проведения массового взрыва.",
-                        "Б) Из технического расчёта со схемой расположения скважин и графическими материалами.",
-                        "B) Из таблицы параметров взрывных работ.",
-                        "Г) Из всего перечисленного.",
-                        "Д) Все ответы неверны"
-                    ],
-                    correct: 3
-                }
-            ],
+        // База вопросов (индекс правильного ответа 'correct' начинается с 0, при необходимости исправьте на нужный)
+        const questions = [
+            // БИЛЕТ № 1
+            {
+                ticket: "БИЛЕТ № 1",
+                text: "1. Какое из перечисленных требований при применении средств инициирования запрещается?",
+                options: [
+                    "А) При изготовлении промежуточных детонаторов из порошкообразных патронированных ВВ с применением детонирующего шнура конец шнура складывать вдвое.",
+                    "Б) Расширять гнёзда патронов (шашек) заводского изготовления, из которых изготовлены боевики.",
+                    "В) Обматывать детонирующий шнур вокруг патрона взрывчатых веществ.",
+                    "Г) При изготовлении промежуточных детонаторов конец детонирующего шнура в патроне завязывать узлом.",
+                    "Д) Все ответы неверны."
+                ],
+                correct: 1
+            },
+            {
+                ticket: "БИЛЕТ № 1",
+                text: "2. При каком условии разрешается выход взрывника из укрытия после взрыва при взрывании с применением электродетонаторов?",
+                options: [
+                    "А) После отсоединения электровзрывной сети от источника тока и замыкания её накоротко.",
+                    "Б) Не ранее чем через 5 мин.",
+                    "В) После проветривания.",
+                    "Г) При выполнении всех перечисленных условий.",
+                    "Д) Все ответы неверны."
+                ],
+                correct: 3
+            },
+            {
+                ticket: "БИЛЕТ № 1",
+                text: "3. Какой документ служит для отпуска взрывчатых материалов взрывникам для производства взрывных работ?",
+                options: ["А) Акт-допуск.", "Б) Наряд-путёвка.", "В) Наряд-накладная.", "Г) Наряд-допуск.", "Д) Все ответы неверны."],
+                correct: 1
+            },
+            {
+                ticket: "БИЛЕТ № 1",
+                text: "4. Какое из перечисленных требований к уничтожению взрывчатых материалов указано верно?",
+                options: [
+                    "А) Допускается применение смёрзшихся ВВ, содержащих жидкие нитроэфиры 20 %.",
+                    "Б) Уничтожение ВМ должно выполняться взрывниками под контролем технического руководителя организации.",
+                    "В) Запрещается подход к месту сжигания до полного прекращения горения костра.",
+                    "Г) Взрывчатые материалы допускается сжигать в их таре в соответствии с руководством.",
+                    "Д) Все ответы неверны."
+                ],
+                correct: 2
+            },
+            {
+                ticket: "БИЛЕТ № 1",
+                text: "5. Какими должны быть действия взрывника, если при подаче напряжения взрыва не произошло?",
+                options: [
+                    "А) Отсоединить от источника тока сеть, замкнуть накоротко концы, взять ключ и только после выяснить причину.",
+                    "Б) Отсоединить сеть, взять ключ и выяснить причину.",
+                    "В) Отсоединить сеть и проверить ее электрическое сопротивление.",
+                    "Г) Периодически подать напряжение, при отсутствии взрыва отключить прибор, взять ключ и выяснить причину."
+                ],
+                correct: 0
+            },
             
-            "3": [
-                {
-                    question: "1. В каком из перечисленных случаев у взрывника может быть изъята Единая книжка взрывника?",
-                    options: [
-                        "A) За нарушения требований охраны труда при выполнении взрывных работ.",
-                        "Б) За неоднократные нарушения режима рабочего времени.",
-                        "B) За появление на рабочем месте в состоянии алкогольного опьянения.",
-                        "Г) За нарушение установленного порядка хранения, транспортирования, использования или учёта взрывчатых материалов, которое привело или могло привести к несчастному случаю, аварии или утрате взрывчатых материалов."
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "2. Какой из перечисленных индексов, наносимый на гильзы электродетонаторов и капсюлей-детонаторов, обозначает номер взрывника?",
-                    options: [
-                        "A) Два буквенных индекса слева от цифровых.",
-                        "Б) Два буквенных индекса справа от цифровых.",
-                        "B) Два цифровых индекса.",
-                        "Г) Три буквенных индекса справа от цифровых.",
-                        "Д) Все ответы неверны."
-                    ],
-                    correct: 1
-                },
-                {
-                    question: "3. Какими способами, в соответствии с установленными требованиями, производится уничтожение взрывчатых материалов?",
-                    options: [
-                        "A) Взрыванием, сжиганием или растворением в воде.",
-                        "Б) Сжиганием, растворением в кислоте.",
-                        "B) Растворением в воде, измельчением с последующим распылением.",
-                        "Г) Измельчением с последующим распылением, биологической обработкой."
-                    ],
-                    correct: 0
-                },
-                {
-                    question: "4. В течение какого срока в организации хранятся проекты буровзрывных (взрывных) работ, паспорта, схемы, в соответствии с которыми осуществляются взрывные работы?",
-                    options: [
-                        "A) Не менее года.",
-                        "Б) Не менее двух лет.",
-                        "B) Не менее трех лет.",
-                        "Г) Не менее пяти лет.",
-                        "Д) Все ответы неверны."
-                    ],
-                    correct: 2
-                },
-                {
-                    question: "5. Когда взрывник может подойти к месту взрыва при ведении счёта взорвавшихся зарядов и отсутствии отказов?",
-                    options: [
-                        "A) Через 2 мин. после последнего взрыва.",
-                        "Б) Через 3 мин. после последнего взрыва.",
-                        "B) Через 4 мин. после последнего взрыва.",
-                        "Г) Через 5 мин. после последнего взрыва."
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "6. Что является основанием для проведения взрывных работ в местах, отвечающих требованиям правил и инструкций по безопасности взрывных работ?",
-                    options: [
-                        "A) Распоряжение лица технического надзора",
-                        "Б) Запись в сменном журнале",
-                        "B) Указание технического руководителя организации.",
-                        "Г) Письменный наряд (задание на выполнение работ) с ознакомлением с ним под роспись и соответствующие наряд-путевки"
-                    ],
-                    correct: 3
-                },
-                {
-                    question: "7. При выполнении какого из перечисленных условий ответственный руководитель взрыва даёт указание о подаче боевого сигнала?",
-                    options: [
-                        "A) Только при получении донесений взрывников, ответственных за заряжание и подготовку к взрыву блоков, за охрану опасной зоны и выставление постов, а также за вывод людей с территории опасной зоны.",
-                        "Б) Только при условии ознакомления с заполненной таблицей параметров взрывных работ.",
-                        "B) Только при условии выполнения мероприятий, перечисленных в распорядке проведения массового взрыва.",
-                        "Г) При выполнении всех перечисленных условий."
-                    ],
-                    correct: 0
-                },
-                {
-                    question: "8. Как должен поступить взрывник, если электровзрывная сеть была смонтирована перед наступлением грозы?",
-                    options: [
-                        "A) Произвести взрывание во время грозы.",
-                        "Б) Произвести взрывание вне зависимости от погодных условий.",
-                        "B) Провести взрывание перед грозой или отсоединить участков
-                    
+            // БИЛЕТ № 3 (сокращенный блок для примера структуры, добавлены первые 3)
+            {
+                ticket: "БИЛЕТ № 3",
+                text: "1. В каком из перечисленных случаев у взрывника может быть изъята Единая книжка взрывника?",
+                options: [
+                    "А) За нарушения требований охраны труда при выполнении взрывных работ.",
+                    "Б) За неоднократные нарушения режима рабочего времени.",
+                    "В) За появление на рабочем месте в состоянии алкогольного опьянения.",
+                    "Г) За нарушение установленного порядка хранения, транспортирования, использования ВМ, приведшее к аварии."
+                ],
+                correct: 3
+            },
+            {
+                ticket: "БИЛЕТ № 3",
+                text: "2. Какой из перечисленных индексов, наносимый на гильзы электродетонаторов и капсюлей-детонаторов, обозначает номер взрывника?",
+                options: [
+                    "А) Два буквенных индекса слева от цифровых.",
+                    "Б) Два буквенных индекса справа от цифровых.",
+                    "В) Два цифровых индекса.",
+                    "Г) Три буквенных индекса справа от цифровых.",
+                    "Д) Все ответы неверны."
+                ],
+                correct: 0
+            },
+            
+            // БИЛЕТ № 4
+            {
+                ticket: "БИЛЕТ № 4",
+                text: "1. С какой периодичностью должны проверяться знания требований безопасности работниками, имеющими Единую книжку взрывника?",
+                options: [
+                    "А) Не реже одного раза в три года.",
+                    "Б) Не реже одного раза в год.",
+                    "В) Не реже одного раза в два года.",
+                    "Г) Все ответы неверны.",
+                    "Д) Не реже одного раза в пять лет."
+                ],
+                correct: 2
+            },
+            
+            // БИЛЕТ № 5
+            {
+                ticket: "БИЛЕТ № 5",
+                text: "1. Через какое время разрешается подход взрывника к месту взрыва, если взрыва не произошло?",
+                options: [
+                    "А) Не ранее чем через 5 мин.",
+                    "Б) Не ранее чем через 10 мин.",
+                    "В) Не ранее чем через 15 мин.",
+                    "Г) С разрешения руководителя взрывных работ.",
+                    "Д) Все ответы неверны."
+                ],
+                correct: 2
+            },
+            
+            // БИЛЕТ № 6
+            {
+                ticket: "БИЛЕТ № 6",
+                text: "2. Какую массу взрывчатых материалов допускается переносить взрывнику при одновременной доставке вручную средств инициирования и взрывчатых веществ?",
+                options: [
+                    "А) Не более 10 кг.",
+                    "Б) Не более 20 кг.",
+                    "В) Не более 14 кг.",
+                    "Г) Не более 16 кг."
+                ],
+                correct: 1
+            },
+            
+            // БИЛЕТ № 7
+            {
+                ticket: "БИЛЕТ № 7",
+                text: "1. В течение какого времени должна проводиться стажировка взрывников перед допуском к самостоятельному производству взрывных работ?",
+                options: [
+                    "А) В течение 15 дней.",
+                    "Б) В течение одного месяца.",
+                    "В) В течение двух месяцев.",
+                    "Г) В течение трех месяцев.",
+                    "Д) Все ответы неверны."
+                ],
+                correct: 1
+            }
+        ];
+
+        // Логика приложения
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        const ticketInfo = document.getElementById('ticket-info');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const finalScore = document.getElementById('final-score');
+
+        // Запуск теста
+        startBtn.addEventListener('click', () => {
+            welcomeScreen.style.display = 'none';
+            quizScreen.style.display = 'block';
+            currentQuestionIndex = 0;
+            score = 0;
+            loadQuestion();
+        });
+
+        // Загрузка вопроса
+        function loadQuestion() {
+            nextBtn.style.display = 'none';
+            optionsContainer.innerHTML = '';
+            
+            const currentQuestion = questions[currentQuestionIndex];
+            ticketInfo.textContent = currentQuestion.ticket + " (Вопрос " + (currentQuestionIndex + 1) + " из " + questions.length + ")";
+            questionText.textContent = currentQuestion.text;
+
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.addEventListener('click', () => selectAnswer(index, button, currentQuestion.correct));
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // Выбор ответа
+        function selectAnswer(selectedIndex, selectedButton, correctIndex) {
+            const allButtons = optionsContainer.querySelectorAll('.option-btn');
+            
+            // Блокируем все кнопки после выбора
+            allButtons.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === correctIndex) {
+                selectedButton.classList.add('correct');
+                score++;
+            } else {
+                selectedButton.classList.add('wrong');
+
+            
